@@ -145,5 +145,8 @@ if __name__ == '__main__':
     
     import IPython.display as ipd
     import soundfile as sf
-    x, Fe = sf.read('mess_difficile.wav')
+    x, Fe = sf.read('audio/mess_difficile.wav')
+    #########################################################################
+    # Remarque : pour que le sf.read marche il faut être à la racine du git #
+    #########################################################################
     print(f' Le message est {decode(x)} ')
