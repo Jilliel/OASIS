@@ -41,17 +41,17 @@ class Signal():
                 weighted_mean += mod /(j+1)
                 total_weight += (1/(j+1))
         weighted_mean = weighted_mean / total_weight
-        print(f'Mean is {weighted_mean}')
+        #print(f'Mean is {weighted_mean}')
         for i in range(len(characters_list)):
             if characters_list[i] != " ":
                 r = modules_list[i]/weighted_mean
                 if r > 1+self.threshold or r < 1-self.threshold :
-                    print(f'Adding a space as {characters_list[i]}\'s mod was too far from the mean with a ratio of {r}')
+                    #print(f'Adding a space as {characters_list[i]}\'s mod was too far from the mean with a ratio of {r}')
                     characters_list[i] = " "
-                else:
-                    print(f'Adding a {characters_list[i]} as the ratio was good enough : {r}')
-            else : 
-                print(f'Adding a space')
+                #else:
+                    #print(f'Adding a {characters_list[i]} as the ratio was good enough : {r}')
+            #else : 
+                #(f'Adding a space')
             message = message + characters_list[i]
         return message
 
@@ -63,8 +63,8 @@ class Char():
         self.len = signal.shape[0]
       
         self.freq_to_char = {0: ' ', 501: 'A', 502: 'B', 503: 'C', 504: 'D', 505: 'E', 506: 'F', 507: 'G', 508: 'H', 509: 'I', 510: 'J', 511: 'K', 512: 'L', 513: 'M', 514: 'N', 515: 'O', 516: 'P', 517: 'Q', 518: 'R', 519: 'S', 520: 'T', 521: 'U', 522: 'V', 523: 'W', 524: 'X', 525: 'Y', 526: 'Z'}
-        self.zero_padd = 10_000
-        self.max_removals = 7
+        self.zero_padd = 128
+        self.max_removals = 15
 
         self.complete_signal_fft = np.fft.fft(self.complete_signal, axis= 0, n= self.zero_padd * self.len, norm='ortho')
 
@@ -124,12 +124,12 @@ class Char():
             i+=1
             
             #print(f'Current biggest module is {mod} at frequency {freq} and phase {phi}')
-        print(i)
+        #print(i)
         if i < self.max_removals:
-            print(f'Char found is {self.get_symbol(np.round(freq))} or frequency {freq}, module {mod} and phase {phi}')
+            #print(f'Char found is {self.get_symbol(np.round(freq))} or frequency {freq}, module {mod} and phase {phi}')
             return self.get_symbol(np.round(freq)), mod, i
         else:
-            print(f'No char found. Defaulting to a space')
+            #print(f'No char found. Defaulting to a space')
             return " ", -1, i
     
 
@@ -145,8 +145,16 @@ if __name__ == '__main__':
     
     import IPython.display as ipd
     import soundfile as sf
+    #########################################################################
+    # Remarque : pour que le sf.read marche il faut être à la racine du git #
+    #########################################################################
     x, Fe = sf.read('audio/mess_difficile.wav')
     #########################################################################
     # Remarque : pour que le sf.read marche il faut être à la racine du git #
     #########################################################################
-    print(f' Le message est {decode(x)} ')
+    import time
+    start = time.perf_counter()
+    message = decode(x)
+    end = time.perf_counter()
+    print(f' Le message est {message} ')
+    print(f'Le temps pour décoder a été de {end-start}s')
