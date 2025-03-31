@@ -61,7 +61,7 @@ def test1():
         return np.array(notes_detected), np.array(instruments_detected)
 
     # Exemple d'utilisation:
-    signal, Fe = sf.read("APP2/audio/gamme_demiTon_guitare.wav")
+    signal, Fe = sf.read("audio/gamme_demiTon_guitare.wav")
     Notes, Instruments = analyse(signal, Fe)
     print("Notes détectées:", Notes)
     print("Instruments détectés:", Instruments)

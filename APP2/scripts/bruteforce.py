@@ -13,12 +13,12 @@ def plot(f, t, Z):
     plt.title('Spectrogramme de la tftc')
     plt.colorbar(label='Amplitude')
     plt.tight_layout()
-    plt.savefig("APP2/result.png")
+    plt.savefig("result.png")
 
 
 def analyse():
     reference = Notes()
-    x, Fe = sf.read("APP2/audio/gamme_demiTon_guitare.wav")
+    x, Fe = sf.read("audio/gamme_demiTon_guitare.wav")
     if x.ndim > 1:
         x = np.mean(x, axis=1)
 
