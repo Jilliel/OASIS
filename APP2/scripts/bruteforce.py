@@ -4,6 +4,8 @@ from scipy.signal import stft
 import soundfile as sf
 import numpy as np
 
+TRESHOLD = 0.9
+
 def plot(f, t, Z):
     plt.figure(figsize=(10, 5))
     plt.pcolormesh(t, f, np.abs(Z), shading='gouraud')
@@ -18,21 +20,29 @@ def plot(f, t, Z):
 
 def analyse():
     reference = Notes()
-    x, Fe = sf.read("audio/gamme_demiTon_guitare.wav")
+    x, Fe = sf.read("audio/love_me_SI101_drums.wav")
     if x.ndim > 1:
         x = np.mean(x, axis=1)
 
-    frequences, time, Zxx = stft(x, fs=Fe, nperseg=1024)
+    frequences, time, Zxx = stft(x, fs=Fe, nperseg=3000)
+    steps = time.shape[0]
 
-    for t in time:
-        fft = np.abs(Zxx[t])
+    print("Nombre de steps: ", steps)
+
+    for t in range(steps):
+        
+        fft = np.abs(Zxx[:, t])
         reference.reset()
         energy = {name: 0 for name in reference.names}
         while reference.isValid():
             for name, note in reference.items():
                 df = np.abs(frequences-note)
-                i = np.argmax(df)
+                i = np.argmin(df)
                 energy[name] += fft[i]
             reference.up()
-        input(energy)
+        print(f"Time: {time[t]}", end = " / ")
+
+        e_max = max(energy.values())
+        notes = [name for name in energy if energy[name]/e_max > TRESHOLD]
+        print(f"Notes: {notes}")
 
