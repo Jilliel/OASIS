@@ -18,7 +18,7 @@ def plot(f, t, Z):
     plt.savefig("result.png")
 
 
-def analyse():
+def analyseNoteRaphael():
     reference = Notes()
     x, Fe = sf.read("audio/love_me_SI101_drums.wav")
     if x.ndim > 1:
