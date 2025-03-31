@@ -4,4 +4,4 @@
 #Ignore pycache files
 **/__pycache__
 
-.png
+*.png
