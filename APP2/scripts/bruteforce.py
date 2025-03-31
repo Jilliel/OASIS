@@ -24,7 +24,9 @@ def analyse():
     if x.ndim > 1:
         x = np.mean(x, axis=1)
 
-    frequences, time, Zxx = stft(x, fs=Fe, nperseg=3000)
+    N = 2048
+    zpad = 10
+    frequences, time, Zxx = stft(x, fs=Fe, nperseg=N, nfft=zpad*N)
     steps = time.shape[0]
 
     print("Nombre de steps: ", steps)
@@ -40,7 +42,7 @@ def analyse():
                 i = np.argmin(df)
                 energy[name] += fft[i]
             reference.up()
-        print(f"Time: {time[t]}", end = " / ")
+        print(f"Step: {t}", end = " / ")
 
         e_max = max(energy.values())
         notes = [name for name in energy if energy[name]/e_max > TRESHOLD]
