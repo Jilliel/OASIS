@@ -1,4 +1,4 @@
-from scripts.detection import analyseNoteGwendal
+from scripts.filtrage import analyseNoteGwendal
 from scripts.bruteforce import analyseNoteRaphael
 
 def test1():
