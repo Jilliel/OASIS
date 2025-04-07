@@ -4,7 +4,7 @@ from scipy.signal import stft
 import soundfile as sf
 import numpy as np
 
-VERBOSE = False
+VERBOSE = True
 TRESHOLD_NOTE = 0.9
 TRESHOLD_INSTRUMENT = 0.5
 TRESHOLD_BOTH = 0.1
@@ -45,9 +45,9 @@ def analyseNoteRaphael(file):
     ratios = []
     if VERBOSE:
         print("Nombre de steps: ", m)
-
+    all_notes = {}
     for t in range(m):
-        
+        all_notes[t] = []
         fft = np.abs(Zxx[:, t]) # Fft à l'instant time[t]
         if VERBOSE:
             print("Instant: ", time[t])
@@ -67,7 +67,8 @@ def analyseNoteRaphael(file):
         for index, name in enumerate(reference.names):
             if energy[name]/e_max > TRESHOLD_NOTE:
                 history[t][index] = 1
-                if VERBOSE:
+                all_notes[t].append(name)
+                if False:
                     print(f"Note: {name} ; Energy: {energy[name]}")
 
         # On détermine l'instrument
@@ -88,7 +89,7 @@ def analyseNoteRaphael(file):
 
 
     # On annule les valeurs dont l'energie est trop faible
-    threshold = np.mean(former) / 2
+    threshold = np.mean(former) / 10
     for t in range(m):
         if former[t] <= threshold:
             ratios[t] = 0
@@ -96,6 +97,29 @@ def analyseNoteRaphael(file):
             instruments[t][1] = 0
             for i in range(len(reference.names)):
                 history[t][i] = 0
+            all_notes[t] = []
+    guitare = {}
+    percussions = {}
+    delta_t = 5
+    for t, L in all_notes.items():
+        guitare[t] = []
+        percussions[t] = []
+        notes_near = {}
+        for tb in range(t-delta_t, t+delta_t+1):
+            instant = all_notes.get(tb, None)
+            if instant is not None:
+                for n in instant:
+                    if n in notes_near:
+                        notes_near[n] += 1
+                    else:
+                        notes_near[n] = 1
+        for n in L :
+            if n in notes_near and notes_near[n] >4 :
+                guitare[t].append(n)
+            else:
+                percussions[t].append(n)
+        if VERBOSE :
+            print(f"Instant {np.round(time[t], 2)}, guitare : {guitare[t]}, percussion : {percussions[t]}")
 
     plt.plot(time, ratios, color="black")
     plt.plot((time[0], time[-1]), (TRESHOLD_INSTRUMENT-TRESHOLD_BOTH, TRESHOLD_INSTRUMENT-TRESHOLD_BOTH), color="red")
