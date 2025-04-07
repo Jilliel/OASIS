@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
-from scripts.utils import Notes
 from scipy.signal import stft
-import soundfile as sf
 import numpy as np
 
 VERBOSE = True
@@ -24,10 +22,27 @@ def plotSpecter(f, t, Z):
     plt.tight_layout()
     plt.savefig("result.png")
 
+class Notes:
+    MINFREQ = 32.7
+    MAXFREQ = 3951.36
+    def __init__(self):
+        self.notes = np.array([32.7, 34.65, 36.71, 38.89, 41.2, 43.65, 46.25, 49, 51.91, 55, 58.27, 61.74])
+        self.names = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
 
-def analyseNoteRaphael(file):
+    def isValid(self):
+        return self.notes[-1] < Notes.MAXFREQ
+    
+    def items(self):
+        return zip(self.names, self.notes)
+    
+    def reset(self):
+        self.notes = np.array([32.7, 34.65, 36.71, 38.89, 41.2, 43.65, 46.25, 49, 51.91, 55, 58.27, 61.74])
+
+    def up(self):
+        self.notes = 2 * self.notes
+
+def analyse(x, Fe):
     reference = Notes()
-    x, Fe = sf.read(REP+file+EXT)
     if x.ndim > 1:
         x = np.mean(x, axis=1)
 
@@ -42,7 +57,7 @@ def analyseNoteRaphael(file):
     history = np.zeros((m, n), dtype=np.uint)
     instruments = np.zeros((m, 2)) #0: Guitare, 1: Percussions
     former = [] #Energie max à chaque instant
-    ratios = []
+
     if VERBOSE:
         print("Nombre de steps: ", m)
     all_notes = {}
@@ -68,42 +83,20 @@ def analyseNoteRaphael(file):
             if energy[name]/e_max > TRESHOLD_NOTE:
                 history[t][index] = 1
                 all_notes[t].append(name)
-                if False:
-                    print(f"Note: {name} ; Energy: {energy[name]}")
-
-        # On détermine l'instrument
-        mask = (Notes.MINFREQ <= frequences) & (frequences < Notes.MAXFREQ)
-        sample = fft[mask]
-        arithmetic_mean = np.mean(sample)
-        geometric_mean = np.exp(np.mean(np.log(sample + EPSILON)))
-        ratio = geometric_mean / (arithmetic_mean + EPSILON)
-        ratios.append(ratio)
-
-        if ratio > TRESHOLD_INSTRUMENT + TRESHOLD_BOTH:
-            instruments[t][1] = 1
-        elif ratio < TRESHOLD_INSTRUMENT - TRESHOLD_BOTH:
-            instruments[t][0] = 1
-        else: 
-            instruments[t][0] = 1
-            instruments[t][1] = 1
-
 
     # On annule les valeurs dont l'energie est trop faible
-    threshold = np.mean(former) / 10
+    threshold = np.mean(former) / 2
     for t in range(m):
         if former[t] <= threshold:
-            ratios[t] = 0
             instruments[t][0] = 0
             instruments[t][1] = 0
             for i in range(len(reference.names)):
                 history[t][i] = 0
             all_notes[t] = []
-    guitare = {}
-    percussions = {}
+
+
     delta_t = 5
     for t, L in all_notes.items():
-        guitare[t] = []
-        percussions[t] = []
         notes_near = {}
         for tb in range(t-delta_t, t+delta_t+1):
             instant = all_notes.get(tb, None)
@@ -113,23 +106,26 @@ def analyseNoteRaphael(file):
                         notes_near[n] += 1
                     else:
                         notes_near[n] = 1
+
         for n in L :
             if n in notes_near and notes_near[n] >4 :
-                guitare[t].append(n)
+                instruments[t][0] = 1
             else:
-                percussions[t].append(n)
-        if VERBOSE :
-            print(f"Instant {np.round(time[t], 2)}, guitare : {guitare[t]}, percussion : {percussions[t]}")
+                instruments[t][1] = 1
 
-    plt.plot(time, ratios, color="black")
-    plt.plot((time[0], time[-1]), (TRESHOLD_INSTRUMENT-TRESHOLD_BOTH, TRESHOLD_INSTRUMENT-TRESHOLD_BOTH), color="red")
-    plt.plot((time[0], time[-1]), (TRESHOLD_INSTRUMENT+TRESHOLD_BOTH, TRESHOLD_INSTRUMENT+TRESHOLD_BOTH), color="red")
-    plt.xlabel("Time")
-    plt.ylabel("Ratio")
-    plt.ylim(0, 1)
-    plt.savefig(SAVE+file+"-ratios.png")
-    plt.clf()
-    plt.cla()
+        if VERBOSE :
+            print(f"Instant {np.round(time[t], 2)}, guitare : {bool(instruments[t][0])}, percussion : {bool(instruments[t][0])}.")
+
+    return history, instruments
+    #plt.plot(time, ratios, color="black")
+    #plt.plot((time[0], time[-1]), (TRESHOLD_INSTRUMENT-TRESHOLD_BOTH, TRESHOLD_INSTRUMENT-TRESHOLD_BOTH), color="red")
+    #plt.plot((time[0], time[-1]), (TRESHOLD_INSTRUMENT+TRESHOLD_BOTH, TRESHOLD_INSTRUMENT+TRESHOLD_BOTH), color="red")
+    #plt.xlabel("Time")
+    #plt.ylabel("Ratio")
+    #plt.ylim(0, 1)
+    #plt.savefig(SAVE+"ratios.png")
+    #plt.clf()
+    #lt.cla()
     #plt.imshow(history)
     #plt.gca().invert_yaxis()
-    #plt.savefig(FILE+"-hist.png")
+    #plt.savefig(SAVE+"hist.png")
