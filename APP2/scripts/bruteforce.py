@@ -4,23 +4,6 @@ import numpy as np
 
 VERBOSE = True
 TRESHOLD_NOTE = 0.9
-TRESHOLD_INSTRUMENT = 0.5
-TRESHOLD_BOTH = 0.1
-EPSILON = 1e-9
-REP = "audio/"
-EXT = ".wav"
-SAVE = "results/"
-
-def plotSpecter(f, t, Z):
-    plt.figure(figsize=(10, 5))
-    plt.pcolormesh(t, f, np.abs(Z), shading='gouraud')
-    plt.ylim(0, 2000)
-    plt.ylabel('Fréquence')
-    plt.xlabel('Temps')
-    plt.title('Spectrogramme de la tftc')
-    plt.colorbar(label='Amplitude')
-    plt.tight_layout()
-    plt.savefig("result.png")
 
 class Notes:
     MINFREQ = 32.7
@@ -117,15 +100,3 @@ def analyse(x, Fe):
             print(f"Instant {np.round(time[t], 2)}, guitare : {bool(instruments[t][0])}, percussion : {bool(instruments[t][0])}.")
 
     return history, instruments
-    #plt.plot(time, ratios, color="black")
-    #plt.plot((time[0], time[-1]), (TRESHOLD_INSTRUMENT-TRESHOLD_BOTH, TRESHOLD_INSTRUMENT-TRESHOLD_BOTH), color="red")
-    #plt.plot((time[0], time[-1]), (TRESHOLD_INSTRUMENT+TRESHOLD_BOTH, TRESHOLD_INSTRUMENT+TRESHOLD_BOTH), color="red")
-    #plt.xlabel("Time")
-    #plt.ylabel("Ratio")
-    #plt.ylim(0, 1)
-    #plt.savefig(SAVE+"ratios.png")
-    #plt.clf()
-    #lt.cla()
-    #plt.imshow(history)
-    #plt.gca().invert_yaxis()
-    #plt.savefig(SAVE+"hist.png")
