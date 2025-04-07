@@ -71,7 +71,7 @@ def analyseNoteRaphael(file):
                     print(f"Note: {name} ; Energy: {energy[name]}")
 
         # On détermine l'instrument
-        mask = (100 <= frequences) & (frequences < 5000)
+        mask = (Notes.MINFREQ <= frequences) & (frequences < Notes.MAXFREQ)
         sample = fft[mask]
         arithmetic_mean = np.mean(sample)
         geometric_mean = np.exp(np.mean(np.log(sample + EPSILON)))
@@ -88,7 +88,7 @@ def analyseNoteRaphael(file):
 
 
     # On annule les valeurs dont l'energie est trop faible
-    threshold = np.mean(former) 
+    threshold = np.mean(former) / 2
     for t in range(m):
         if former[t] <= threshold:
             ratios[t] = 0
